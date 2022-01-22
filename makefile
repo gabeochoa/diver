@@ -39,7 +39,7 @@ engine:
 	$(MAKE) -C vendor/supermarket-engine 
 
 diver: engine $(OBJ_FILES)
-	$(CCC) $(FLAGS) $(LIBS) $(FRAMEWORKS) -o $(EXE) ./diver/main.cpp ./vendor/supermarket-engine/output/libengine.a
+	$(CCC) $(FLAGS) $(LIBS) $(FRAMEWORKS) -o $(EXE) $(SRC_FILES) ./vendor/supermarket-engine/output/libengine.a
 	DEBUG=123 ./$(EXE)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp 
