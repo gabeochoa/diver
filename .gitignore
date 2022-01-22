@@ -1,0 +1,13 @@
+.DS_Store
+.cache/
+*.swp
+SFML/*
+windows_build/*
+*.o
+*.exe
+*.zip
+*.gch
+*.d
+old/*
+*.tmp
+*.trace

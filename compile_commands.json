@@ -1,0 +1,56 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/clang++",
+      "-std=c++2a",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Wuninitialized",
+      "-Wshadow",
+      "-Wmost",
+      "-g",
+      "-I/usr/local/include",
+      "-c",
+      "-o",
+      "output/super/main.o",
+      "super/main.cpp"
+    ],
+    "directory": "/Users/gabeochoa/Dropbox (Meta)/P/supermarket",
+    "file": "/Users/gabeochoa/Dropbox (Meta)/P/supermarket/super/main.cpp",
+    "output": "/Users/gabeochoa/Dropbox (Meta)/P/supermarket/output/super/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang++",
+      "-c",
+      "-std=c++2a",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Wuninitialized",
+      "-Wshadow",
+      "-Wmost",
+      "-g",
+      "-I/usr/local/include",
+      "-Ivendor/",
+      "-framework",
+      "CoreVideo",
+      "-framework",
+      "OpenGL",
+      "-framework",
+      "IOKit",
+      "-framework",
+      "Cocoa",
+      "-framework",
+      "Carbon",
+      "./vendor/supermarket-engine/output/libengine.a",
+      "-o",
+      "./output/super/super.exe",
+      "./super/main.cpp"
+    ],
+    "directory": "/Users/gabeochoa/Dropbox (Meta)/P/supermarket",
+    "file": "/Users/gabeochoa/Dropbox (Meta)/P/supermarket/super/main.cpp",
+    "output": "/Users/gabeochoa/Dropbox (Meta)/P/supermarket/output/super/super.exe"
+  }
+]
