@@ -14,12 +14,12 @@ struct ParticleSystem {
         float angle = 0.f;
         float angularVelocity = 0.f;
 
-        glm::vec4 colorStart;
-        glm::vec4 colorEnd;
+        glm::vec4 colorStart = glm::vec4{1.f};
+        glm::vec4 colorEnd = glm::vec4{1.f};
 
         glm::vec2 size;
-        float sizeStart;
-        float sizeEnd;
+        float sizeStart = 1.f;
+        float sizeEnd = 1.f;
 
         float lifetime = 1.f;
         float lifeRemaining = 0.f;
@@ -28,10 +28,11 @@ struct ParticleSystem {
 
         void render() {
             float life = lifeRemaining / lifetime;
+            float sizeMult = lerp(sizeEnd, sizeStart, life);
+
             glm::vec4 color = lerp(colorEnd, colorStart, life);
             color.a = color.a * life;
 
-            float sizeMult = lerp(sizeEnd, sizeStart, life);
             // computing angle transforms are expensive so
             // if the angle is under thresh, just render it square
             if (angle <= 5.f) {
@@ -63,6 +64,7 @@ struct ParticleSystem {
         particle.lifetime = p.lifetime;
         particle.lifeRemaining = p.lifetime;
 
+        particle.size = p.size;
         particle.sizeStart = p.sizeStart;
         particle.sizeEnd = p.sizeEnd;
 
@@ -71,8 +73,11 @@ struct ParticleSystem {
 
     void onUpdate(Time dt) {
         for (auto& particle : pool) {
-            if (particle.lifeRemaining <= 0.f) particle.active = false;
             if (!particle.active) continue;
+            if (particle.lifeRemaining <= 0.f) {
+                particle.active = false;
+                continue;
+            }
             particle.lifeRemaining -= dt.s();
             particle.position += particle.velocity * dt.s();
             particle.angle += particle.angularVelocity * dt.s();
@@ -80,6 +85,8 @@ struct ParticleSystem {
     }
 
     void render() {
+        Renderer::drawQuad(glm::vec2{0.f}, glm::vec2{1.f},
+                           glm::vec4{0.3, 0.2, 0.8, 1.f}, "white");
         for (auto& particle : pool) {
             if (!particle.active) continue;
             particle.render();
