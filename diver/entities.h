@@ -39,6 +39,7 @@ struct Movable : public Collidable {
 
 struct Player : public Movable {
     std::vector<std::shared_ptr<Weapon>> weapons;
+    int facing = 0;
 
     Player(const glm::vec2& position_ = glm::vec2{},
            const glm::vec2& size_ = glm::vec2{1.f}, float angle_ = 0.f,
@@ -46,20 +47,26 @@ struct Player : public Movable {
            const std::string& textureName_ = "white")
         : Movable(position_, size_, angle_, color_, textureName_) {
         speed = 5.f;
+
+        weapons.push_back(std::make_shared<Dart>(Dart(this)));
     }
 
     virtual void onUpdate(Time dt) {
         if (Input::isKeyPressed(Key::getMapping("Left"))) {
             position.x -= speed * dt;
+            facing = 0;
         }
         if (Input::isKeyPressed(Key::getMapping("Right"))) {
             position.x += speed * dt;
+            facing = 1;
         }
         if (Input::isKeyPressed(Key::getMapping("Down"))) {
             position.y -= speed * dt;
+            facing = 2;
         }
         if (Input::isKeyPressed(Key::getMapping("Up"))) {
             position.y += speed * dt;
+            facing = 3;
         }
 
         auto controller =
@@ -73,6 +80,14 @@ struct Player : public Movable {
         }
     }
     virtual const char* typeString() const { return "Player"; }
+
+    virtual void render(const RenderOptions& ro = RenderOptions()) {
+        Entity::render(ro);
+
+        for (auto w : weapons) {
+            w->render();
+        }
+    }
 };
 
 struct Enemy : public Movable {
