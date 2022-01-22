@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
         .height = 1080,
         .title = "Diver",
         .clearEnabled = true,
-        .escClosesWindow = false,
+        .escClosesWindow = true,
     });
 
     // NOTE: Cant live in tests because app inits keyboard...

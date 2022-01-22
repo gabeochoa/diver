@@ -11,3 +11,4 @@ windows_build/*
 old/*
 *.tmp
 *.trace
+output/*

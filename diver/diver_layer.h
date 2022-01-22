@@ -1,18 +1,36 @@
 #pragma once
 
+// TODO move this to engine
+#include "custom_fmt.h"
+//
+
+#include "../vendor/supermarket-engine/engine/entity.h"
+//
 #include "../vendor/supermarket-engine/engine/app.h"
 #include "../vendor/supermarket-engine/engine/camera.h"
-#include "../vendor/supermarket-engine/engine/entity.h"
 #include "../vendor/supermarket-engine/engine/globals.h"
 #include "../vendor/supermarket-engine/engine/layer.h"
 #include "../vendor/supermarket-engine/engine/pch.hpp"
 #include "../vendor/supermarket-engine/engine/renderer.h"
 
-struct Player : public Entity {
-    //
+struct Movable : public Entity {
     float speed = 1.f;
 
-    Player() : Entity() {}
+    Movable(const glm::vec2& position_ = glm::vec2{},
+            const glm::vec2& size_ = glm::vec2{1.f}, float angle_ = 0.f,
+            const glm::vec4& color_ = glm::vec4{1.f},
+            const std::string& textureName_ = "white")
+        : Entity(position_, size_, angle_, color_, textureName_) {}
+};
+
+struct Player : public Movable {
+    //
+
+    Player(const glm::vec2& position_ = glm::vec2{},
+           const glm::vec2& size_ = glm::vec2{1.f}, float angle_ = 0.f,
+           const glm::vec4& color_ = glm::vec4{1.f},
+           const std::string& textureName_ = "white")
+        : Movable(position_, size_, angle_, color_, textureName_) {}
 
     virtual void onUpdate(Time dt) {
         if (Input::isKeyPressed(Key::getMapping("Left"))) {
@@ -27,12 +45,28 @@ struct Player : public Entity {
         if (Input::isKeyPressed(Key::getMapping("Up"))) {
             position.y += speed * dt;
         }
+
+        auto controller =
+            GLOBALS.get_ptr<OrthoCameraController>("diverCameraController");
+        controller->camera.position.x = position.x;
+        controller->camera.position.y = position.y;
+        controller->camera.updateViewMat();
     }
     virtual const char* typeString() const { return "Player"; }
 };
 
+struct Enemy : public Movable {
+    Enemy(const glm::vec2& position_, const glm::vec2& size_, float angle_,
+          const glm::vec4& color_, const std::string& textureName_)
+        : Movable(position_, size_, angle_, color_, textureName_) {}
+
+    virtual void onUpdate(Time dt) {}
+    virtual const char* typeString() const { return "Enemy"; }
+};
+
 struct DiverLayer : public Layer {
     std::shared_ptr<OrthoCameraController> cameraController;
+    std::shared_ptr<Player> player;
 
     DiverLayer() : Layer("Diver") {
         isMinimized = true;
@@ -42,10 +76,13 @@ struct DiverLayer : public Layer {
         cameraController.reset(new OrthoCameraController(appSettings.ratio));
         GLOBALS.set<OrthoCameraController>("diverCameraController",
                                            cameraController.get());
+        cameraController->setZoomLevel(5.f);
 
         cameraController->camera.setViewport(
             glm::vec4{0, 0, appSettings.width, appSettings.height});
         cameraController->rotationEnabled = false;
+        cameraController->zoomEnabled = false;
+        cameraController->movementEnabled = false;
 
         // 918 × 203 pixels at 16 x 16 with margin 1
         float playerSprite = 16.f;
@@ -64,12 +101,17 @@ struct DiverLayer : public Layer {
             "player3",
         };
 
-        auto player = Player();
-        player.color = gen_rand_vec4(0.3f, 1.0f);
-        player.color.w = 1.f;
-        player.size = {0.6f, 0.6f};
-        player.textureName = peopleSprites[0];
-        EntityHelper::addEntity(std::make_shared<Player>(player));
+        player = std::make_shared<Player>();
+        player->size = {0.6f, 0.6f};
+        player->color = glm::vec4{gen_rand_vec3(0.3f, 1.0f), 1.f};
+        player->textureName = peopleSprites[0];
+        EntityHelper::addEntity(player);
+
+        for (int i = 0; i < 300; i++) {
+            EntityHelper::addEntity(std::make_shared<Enemy>(Enemy(
+                glm::vec2{10 * cos(i), 10 * sin(i)}, glm::vec2{0.6f, 0.6f}, 0,
+                gen_rand_vec4(0.3f, 1.0f), peopleSprites[1])));
+        }
     }
 
     virtual ~DiverLayer() {}
@@ -142,7 +184,7 @@ struct DiverLayer : public Layer {
 
     virtual void onEvent(Event& event) override {
         // if (Menu::get().state != Menu::State::Game) return;
-        cameraController->onEvent(event);
+        // cameraController->onEvent(event);
         EventDispatcher dispatcher(event);
         dispatcher.dispatch<Mouse::MouseButtonPressedEvent>(std::bind(
             &DiverLayer::onMouseButtonPressed, this, std::placeholders::_1));
