@@ -39,7 +39,7 @@ struct Movable : public Collidable {
 
 struct Player : public Movable {
     std::vector<std::shared_ptr<Weapon>> weapons;
-    int facing = 0;
+    int facing = 1;
 
     Player(const glm::vec2& position_ = glm::vec2{},
            const glm::vec2& size_ = glm::vec2{1.f}, float angle_ = 0.f,

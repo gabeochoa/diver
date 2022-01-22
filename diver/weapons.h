@@ -7,7 +7,6 @@
 
 struct Weapon {
     Entity* owner;
-    ParticleSystem ps;
     float dmg;
     float cooldown;
     float timeleft;
@@ -24,15 +23,41 @@ struct Weapon {
         }
     }
 
-    void onUpdate(Time dt) {
-        handleCooldown(dt);
-        ps.onUpdate(dt);
+    void onUpdate(Time dt) { handleCooldown(dt); }
+
+    virtual void render() {}
+    virtual void fire() = 0;
+};
+
+struct Projectile : Entity {
+    Weapon* owner;
+    glm::vec2 velocity;
+    float angularVelocity;
+
+    Projectile(
+        // projectile
+        Weapon* o, const glm::vec2& velocity_ = glm::vec2{},
+        const float angularVelocity_ = 0.f,
+
+        // entity stuff
+        const glm::vec2& position_ = glm::vec2{},
+        const glm::vec2& size_ = glm::vec2{1.f}, float angle_ = 0.f,
+        const glm::vec4& color_ = glm::vec4{1.f},
+        const std::string& textureName_ = "white")
+        : Entity(position_, size_, angle_, color_, textureName_) {
+        owner = o;
+        velocity = velocity_;
+        angularVelocity = angularVelocity_;
     }
 
-    void fire() { ps.emit(createParticle()); }
-    void render() { ps.render(); }
+    void onUpdate(Time dt) {
+        angle += angularVelocity * dt.s();
+        auto movement = glm::vec2{velocity.x * cos(glm::radians(angle)),
+                                  velocity.y * sin(glm::radians(angle))};
+        position += movement * dt.s();
+    }
 
-    virtual ParticleSystem::Particle createParticle() = 0;
+    virtual const char* typeString() const { return "Projectile"; }
 };
 
 // TODO support homing
@@ -60,5 +85,5 @@ struct Dart : public Weapon {
         range = 10.f;
     }
 
-    virtual ParticleSystem::Particle createParticle() override;
+    virtual void fire() override;
 };
