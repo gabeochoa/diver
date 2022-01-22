@@ -36,10 +36,9 @@ windows: diver
 # end windows
 
 engine: 
-	cd vendor/divermarket-engine
-	make
+	$(MAKE) -C vendor/supermarket-engine 
 
-diver: $(OBJ_FILES)
+diver: engine $(OBJ_FILES)
 	$(CCC) $(FLAGS) $(LIBS) $(FRAMEWORKS) -o $(EXE) ./diver/main.cpp ./vendor/supermarket-engine/output/libengine.a
 	DEBUG=123 ./$(EXE)
 
