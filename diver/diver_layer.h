@@ -13,24 +13,42 @@
 #include "../vendor/supermarket-engine/engine/pch.hpp"
 #include "../vendor/supermarket-engine/engine/renderer.h"
 
-struct Movable : public Entity {
+struct Collidable : public Entity {
+    Collidable(const glm::vec2& position_ = glm::vec2{},
+               const glm::vec2& size_ = glm::vec2{1.f}, float angle_ = 0.f,
+               const glm::vec4& color_ = glm::vec4{1.f},
+               const std::string& textureName_ = "white")
+        : Entity(position_, size_, angle_, color_, textureName_) {}
+};
+
+struct StaticObject : public Collidable {
+    StaticObject(const glm::vec2& position_ = glm::vec2{},
+                 const glm::vec2& size_ = glm::vec2{1.f}, float angle_ = 0.f,
+                 const glm::vec4& color_ = glm::vec4{1.f},
+                 const std::string& textureName_ = "white")
+        : Collidable(position_, size_, angle_, color_, textureName_) {}
+
+    virtual const char* typeString() const { return "StaticObject"; }
+};
+
+struct Movable : public Collidable {
     float speed = 1.f;
 
     Movable(const glm::vec2& position_ = glm::vec2{},
             const glm::vec2& size_ = glm::vec2{1.f}, float angle_ = 0.f,
             const glm::vec4& color_ = glm::vec4{1.f},
             const std::string& textureName_ = "white")
-        : Entity(position_, size_, angle_, color_, textureName_) {}
+        : Collidable(position_, size_, angle_, color_, textureName_) {}
 };
 
 struct Player : public Movable {
-    //
-
     Player(const glm::vec2& position_ = glm::vec2{},
            const glm::vec2& size_ = glm::vec2{1.f}, float angle_ = 0.f,
            const glm::vec4& color_ = glm::vec4{1.f},
            const std::string& textureName_ = "white")
-        : Movable(position_, size_, angle_, color_, textureName_) {}
+        : Movable(position_, size_, angle_, color_, textureName_) {
+        speed = 5.f;
+    }
 
     virtual void onUpdate(Time dt) {
         if (Input::isKeyPressed(Key::getMapping("Left"))) {
@@ -58,9 +76,19 @@ struct Player : public Movable {
 struct Enemy : public Movable {
     Enemy(const glm::vec2& position_, const glm::vec2& size_, float angle_,
           const glm::vec4& color_, const std::string& textureName_)
-        : Movable(position_, size_, angle_, color_, textureName_) {}
+        : Movable(position_, size_, angle_, color_, textureName_) {
+        speed = 1.f;
+    }
 
-    virtual void onUpdate(Time dt) {}
+    void moveTowardPlayer(Time dt) {
+        auto player = GLOBALS.get<Player>("player");
+        position = lerp(position, player.position, speed * dt);
+    }
+
+    virtual void onUpdate(Time dt) {
+        Movable::onUpdate(dt);
+        moveTowardPlayer(dt);
+    }
     virtual const char* typeString() const { return "Enemy"; }
 };
 
@@ -106,11 +134,32 @@ struct DiverLayer : public Layer {
         player->color = glm::vec4{gen_rand_vec3(0.3f, 1.0f), 1.f};
         player->textureName = peopleSprites[0];
         EntityHelper::addEntity(player);
+        GLOBALS.set<Player>("player", player.get());
 
         for (int i = 0; i < 300; i++) {
             EntityHelper::addEntity(std::make_shared<Enemy>(Enemy(
                 glm::vec2{10 * cos(i), 10 * sin(i)}, glm::vec2{0.6f, 0.6f}, 0,
                 gen_rand_vec4(0.3f, 1.0f), peopleSprites[1])));
+        }
+
+        for (int i = 0; i < 300; i++) {
+            EntityHelper::addEntity(
+                std::make_shared<StaticObject>(StaticObject(  //
+                    glm::vec2{-10, i},                        //
+                    glm::vec2{0.6f, 0.6f},                    //
+                    0,                                        //
+                    gen_rand_vec4(0.3f, 1.0f),                //
+                    peopleSprites[1]                          //
+                    )));
+
+            EntityHelper::addEntity(
+                std::make_shared<StaticObject>(StaticObject(  //
+                    glm::vec2{10, i},                         //
+                    glm::vec2{0.6f, 0.6f},                    //
+                    0,                                        //
+                    gen_rand_vec4(0.3f, 1.0f),                //
+                    peopleSprites[1]                          //
+                    )));
         }
     }
 
