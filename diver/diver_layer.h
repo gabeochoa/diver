@@ -28,27 +28,28 @@ struct DiverLayer : public Layer {
         cameraController->zoomEnabled = false;
         cameraController->movementEnabled = false;
 
-        // 918 × 203 pixels at 16 x 16 with margin 1
-        float playerSprite = 16.f;
-        Renderer::addTexture("./resources/character_tilesheet.png");
-        Renderer::addSubtexture("character_tilesheet", "player", 0, 0,
-                                playerSprite, playerSprite);
-        Renderer::addSubtexture("character_tilesheet", "player2", 0, 1,
-                                playerSprite, playerSprite);
-        Renderer::addSubtexture("character_tilesheet", "player3", 1, 1,
-                                playerSprite, playerSprite);
+        float playerSprite = 32.f;
+        Renderer::addTexture("./resources/tilesheet.png");
+        Renderer::addSubtexture("tilesheet", "player", 0, 0, playerSprite,
+                                playerSprite);
+        Renderer::addSubtexture("tilesheet", "fish0", 0, 1, playerSprite,
+                                playerSprite);
+        Renderer::addSubtexture("tilesheet", "fish1", 1, 1, playerSprite,
+                                playerSprite);
+        Renderer::addSubtexture("tilesheet", "fish2", 2, 1, playerSprite,
+                                playerSprite);
 
         const int num_people_sprites = 3;
-        std::array<std::string, num_people_sprites> peopleSprites = {
-            "player",
-            "player2",
-            "player3",
+        std::array<std::string, num_people_sprites> fishSprites = {
+            "fish0",
+            "fish1",
+            "fish2",
         };
 
         player = std::make_shared<Player>();
         player->size = {0.6f, 0.6f};
         player->color = glm::vec4{gen_rand_vec3(0.3f, 1.0f), 1.f};
-        player->textureName = peopleSprites[0];
+        player->textureName = "player";
         EntityHelper::addEntity(player);
         GLOBALS.set<Player>("player", player.get());
 
@@ -56,7 +57,8 @@ struct DiverLayer : public Layer {
             EntityHelper::addEntity(std::make_shared<Enemy>(Enemy(
                 glm::vec2{randIn(10, 100) * cos(i), randIn(10, 100) * sin(i)},
                 glm::vec2{0.6f, 0.6f}, 0,
-                glm::vec4{gen_rand_vec3(0.3f, 1.0f), 1.f}, peopleSprites[1])));
+                glm::vec4{gen_rand_vec3(0.3f, 1.0f), 1.f},
+                fishSprites[i % fishSprites.size()])));
         }
 
         for (int i = -50; i < 50; i++) {
@@ -66,7 +68,7 @@ struct DiverLayer : public Layer {
                     glm::vec2{0.6f, 0.6f},                    //
                     0,                                        //
                     gen_rand_vec4(0.3f, 1.0f),                //
-                    peopleSprites[1]                          //
+                    fishSprites[1]                            //
                     )));
 
             EntityHelper::addEntity(
@@ -75,7 +77,7 @@ struct DiverLayer : public Layer {
                     glm::vec2{0.6f, 0.6f},                    //
                     0,                                        //
                     gen_rand_vec4(0.3f, 1.0f),                //
-                    peopleSprites[1]                          //
+                    fishSprites[1]                            //
                     )));
         }
     }
