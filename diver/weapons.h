@@ -52,8 +52,8 @@ struct Projectile : Entity {
 
     void onUpdate(Time dt) {
         angle += angularVelocity * dt.s();
-        auto movement = glm::vec2{velocity.x * cos(glm::radians(angle)),
-                                  velocity.y * sin(glm::radians(angle))};
+        auto movement = glm::vec2{velocity.x * sin(glm::radians(angle)),
+                                  velocity.y * cos(glm::radians(angle))};
         position += movement * dt.s();
     }
 

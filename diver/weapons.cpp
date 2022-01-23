@@ -12,15 +12,15 @@ void Dart::fire() {
         if (!player) return 0;
 
         switch (player->facing) {
+            case 0:
+                return 270;
             case 1:
                 return 90;
             case 2:
-                return 180;
+                return -180;
             case 3:
-                return 0;
-            case 0:
             default:
-                return -90;
+                return 0;
         }
     };
 
@@ -28,7 +28,7 @@ void Dart::fire() {
         std::make_shared<Projectile>(  //
             Projectile(                //
                 this,                  // owner
-                glm::vec2{0.f, 1.f},   // vel
+                glm::vec2{1.f, 1.f},   // vel
                 0.f,                   // angularVel
                 // entity stuff
                 owner->position,       // position
