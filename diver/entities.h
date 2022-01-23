@@ -65,7 +65,7 @@ struct Player : public Movable {
         : Movable(position_, size_, angle_, color_, textureName_) {
         speed = 5.f;
 
-        weapons.push_back(std::make_shared<Weapon>(Spear(this)));
+        weapons.push_back(std::make_shared<Bubbles>(Bubbles(this)));
     }
 
     virtual void onUpdate(Time dt) {
@@ -120,7 +120,7 @@ struct Enemy : public Movable {
 
     glm::vec2 toPlayer(std::vector<std::shared_ptr<Enemy>>) {
         auto player = GLOBALS.get<Player>("player");
-        return (player.position - position) / 100.f;
+        return (player.position - position) / 50.f;
     }
 
     glm::vec2 separate(std::vector<std::shared_ptr<Enemy>> enemies) {

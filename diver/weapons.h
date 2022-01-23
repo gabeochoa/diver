@@ -15,6 +15,7 @@ struct Weapon {
     float range;            // ? nothing right now TODO
     float projectileSpeed;  // how fast it goes + owner speed
     glm::vec2 projectileSize;
+    int projectileIndex = 0;
 
     Weapon(Player* o) : owner(o) {}
     virtual ~Weapon() {}
@@ -24,11 +25,13 @@ struct Weapon {
         if (timeleft <= 0) {
             timeleft = cooldown;
             fire();
+            projectileIndex++;
         }
     }
 
     void onUpdate(Time dt) { handleCooldown(dt); }
     void fire();
+    virtual float getAngle(Player* player) = 0;
     virtual void render() {}
 };
 
@@ -79,6 +82,7 @@ struct Dart : public Weapon {
         projectileSpeed = 3.f;
         projectileSize = glm::vec2{0.05f, 0.2f};
     }
+    float getAngle(Player* player) override;
 };
 
 struct Spear : public Weapon {
@@ -86,10 +90,23 @@ struct Spear : public Weapon {
         dmg = 20.f;
         cooldown = 1.f;
         timeleft = cooldown;
-        range = 3.f;
+        range = 2.f;
         projectileSpeed = 1.5f;
         projectileSize = glm::vec2{0.2f, 1.f};
     }
+    float getAngle(Player* player) override;
+};
+
+struct Bubbles : public Weapon {
+    Bubbles(Player* o) : Weapon(o) {
+        dmg = 1.f;
+        cooldown = 0.1f;
+        timeleft = cooldown;
+        range = 200.f;
+        projectileSpeed = 0.1f;
+        projectileSize = glm::vec2{0.2f, 0.2f};
+    }
+    float getAngle(Player* player) override;
 };
 
 // TODO support homing

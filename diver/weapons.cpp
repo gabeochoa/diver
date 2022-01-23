@@ -7,22 +7,6 @@
 #include "entities.h"
 
 void Weapon::fire() {
-    auto getAngle = [](Player* player) -> float {
-        if (!player) return 0;
-
-        switch (player->facing) {
-            case 0:
-                return 270;
-            case 1:
-                return 90;
-            case 2:
-                return -180;
-            case 3:
-            default:
-                return 0;
-        }
-    };
-
     EntityHelper::addEntity(                                //
         std::make_shared<Projectile>(                       //
             Projectile(                                     //
@@ -39,3 +23,23 @@ void Weapon::fire() {
                 )                 //
             ));
 }
+
+float Dart::getAngle(Player* player) {
+    if (!player) return 0;
+
+    switch (player->facing) {
+        case 0:
+            return 270;
+        case 1:
+            return 90;
+        case 2:
+            return -180;
+        case 3:
+        default:
+            return 0;
+    }
+}
+
+float Spear::getAngle(Player*) { return projectileIndex % 2 == 0 ? 90 : 270; }
+float Bubbles::getAngle(Player*) { return (projectileIndex * 36) % 360; }
+
