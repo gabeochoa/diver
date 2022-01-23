@@ -99,7 +99,7 @@ struct Player : public Movable {
     virtual const char* typeString() const { return "Player"; }
 
     virtual void render(const RenderOptions& ro = RenderOptions()) {
-        Entity::render(ro);
+        Movable::render(ro);
 
         for (auto w : weapons) {
             w->render();
@@ -111,6 +111,7 @@ struct Enemy : public Movable {
     glm::vec2 velocity;
     glm::vec2 acceleration;
     float maxacc = 0.03f;
+    float dmg = 1.f;
 
     Enemy(const glm::vec2& position_, const glm::vec2& size_, float angle_,
           const glm::vec4& color_, const std::string& textureName_)

@@ -54,7 +54,7 @@ struct DiverLayer : public Layer {
 
         for (int i = 0; i < 10; i++) {
             EntityHelper::addEntity(std::make_shared<Enemy>(Enemy(
-                glm::vec2{randIn(1, 10) * cos(i), randIn(1, 10) * sin(i)},
+                glm::vec2{randIn(10, 100) * cos(i), randIn(10, 100) * sin(i)},
                 glm::vec2{0.6f, 0.6f}, 0,
                 glm::vec4{gen_rand_vec3(0.3f, 1.0f), 1.f}, peopleSprites[1])));
         }
@@ -91,6 +91,13 @@ struct DiverLayer : public Layer {
 
         EntityHelper::forEachEntity([&](auto entity) {  //
             entity->onUpdate(dt);
+            return EntityHelper::ForEachFlow::None;
+        });
+
+        EntityHelper::forEach<Enemy>([&](auto enemy) {  //
+            if (aabb(enemy->getRect(), player->getRect())) {
+                player->health -= enemy->dmg;
+            }
             return EntityHelper::ForEachFlow::None;
         });
 
@@ -161,7 +168,10 @@ struct DiverLayer : public Layer {
         log_trace("{:.2}s ({:.2} ms) ", dt.s(), dt.ms());
         prof give_me_a_name(__PROFILE_FUNC__);
 
-        child_updates(dt);        // move things around
+        if (player->health > 0) {
+            child_updates(dt);  // move things around
+        }
+
         render();                 // draw everything
         EntityHelper::cleanup();  // Cleanup dead entities
     }
