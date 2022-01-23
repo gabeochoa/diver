@@ -91,6 +91,26 @@ struct DiverLayer : public Layer {
 
         EntityHelper::forEachEntity([&](auto entity) {  //
             entity->onUpdate(dt);
+            return EntityHelper::ForEachFlow::None;
+        });
+
+        float MAX_DIST = 200.f;
+
+        EntityHelper::forEach<Projectile>([&](auto proj) {
+            // out of bounds just delete it and move on
+            if (glm::distance(proj->position, glm::vec2{0.f}) > MAX_DIST) {
+                proj->cleanup = true;
+                return EntityHelper::ForEachFlow::Continue;
+            }
+            EntityHelper::forEach<Enemy>([&](auto enemy) {  //
+                if (aabb(proj->getRect(), enemy->getRect())) {
+                    enemy->health -= proj->owner->dmg;
+                    proj->cleanup = true;
+                    return EntityHelper::ForEachFlow::Break;
+                }
+                return EntityHelper::ForEachFlow::None;
+            });
+            return EntityHelper::ForEachFlow::None;
         });
     }
 
@@ -100,6 +120,7 @@ struct DiverLayer : public Layer {
 
         EntityHelper::forEachEntity([&](auto entity) {  //
             entity->render();
+            return EntityHelper::ForEachFlow::None;
         });
 
         Renderer::end();

@@ -28,6 +28,7 @@ struct StaticObject : public Collidable {
 };
 
 struct Movable : public Collidable {
+    float health = 100.f;
     float speed = 1.f;
 
     Movable(const glm::vec2& position_ = glm::vec2{},

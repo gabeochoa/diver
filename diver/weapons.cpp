@@ -28,14 +28,14 @@ void Dart::fire() {
         std::make_shared<Projectile>(  //
             Projectile(                //
                 this,                  // owner
-                glm::vec2{1.f, 1.f},   // vel
+                glm::vec2{3.f},        // vel
                 0.f,                   // angularVel
                 // entity stuff
-                owner->position,       // position
-                glm::vec2{0.1, 0.2f},  // size
-                getAngle(owner),       // angle
-                glm::vec4{1.f},        // color
-                "white"                //
-                )                      //
+                owner->position,        // position
+                glm::vec2{0.05, 0.1f},  // size
+                getAngle(owner),        // angle
+                glm::vec4{1.f},         // color
+                "white"                 //
+                )                       //
             ));
 }
