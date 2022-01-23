@@ -63,6 +63,7 @@ struct GameUILayer : public Layer {
         };
     }
 
+    // TODO add text that shows the numbers
     void renderExperienceBar() {
         auto player = GLOBALS.get<Player>("player");
         float expPct = player.experience / player.expNeededForNextLevel;

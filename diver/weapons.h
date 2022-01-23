@@ -84,7 +84,7 @@ struct Dart : public Weapon {
         dmg = 10.f;
         cooldown = 0.5f;
         timeleft = cooldown;
-        range = 200.f;
+        range = 8.f;
         projectileSpeed = 3.f;
         projectileSize = glm::vec2{0.2f, 0.4f};
 
@@ -116,8 +116,8 @@ struct Bubbles : public Weapon {
         dmg = 100.f;
         cooldown = 0.1f;
         timeleft = cooldown;
-        range = 200.f;
-        projectileSpeed = 0.1f;
+        range = 8.f;
+        projectileSpeed = 0.05f;
         projectileSize = glm::vec2{0.2f, 0.2f};
 
         Renderer::addSubtexture("tilesheet", "bubbles0", 0, 5, 32.f, 32.f);

@@ -16,7 +16,7 @@ struct DiverLayer : public Layer {
         "fish1",
         "fish2",
     };
-    int MAX_ENEMIES = 10;
+    int MAX_ENEMIES = 100;
 
     DiverLayer() : Layer("Diver") {
         isMinimized = true;
