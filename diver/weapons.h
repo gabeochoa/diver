@@ -5,14 +5,16 @@
 #include "../vendor/supermarket-engine/engine/time.h"
 #include "particle_system.h"
 
+struct Player;
+
 struct Weapon {
-    Entity* owner;
+    Player* owner;
     float dmg;
     float cooldown;
     float timeleft;
     float range;
 
-    Weapon(Entity* o) : owner(o) {}
+    Weapon(Player* o) : owner(o) {}
     virtual ~Weapon() {}
 
     void handleCooldown(Time dt) {
@@ -78,8 +80,8 @@ struct Projectile : Entity {
 // }
 
 struct Dart : public Weapon {
-    Dart(Entity* o) : Weapon(o) {
-        dmg = 0.1f;
+    Dart(Player* o) : Weapon(o) {
+        dmg = 10.f;
         cooldown = 0.5f;
         timeleft = cooldown;
         range = 10.f;

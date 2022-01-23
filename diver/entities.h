@@ -28,14 +28,30 @@ struct StaticObject : public Collidable {
 };
 
 struct Movable : public Collidable {
-    float health = 100.f;
+    float maxhealth = 100.f;
+    float health;
+
     float speed = 1.f;
 
     Movable(const glm::vec2& position_ = glm::vec2{},
             const glm::vec2& size_ = glm::vec2{1.f}, float angle_ = 0.f,
             const glm::vec4& color_ = glm::vec4{1.f},
             const std::string& textureName_ = "white")
-        : Collidable(position_, size_, angle_, color_, textureName_) {}
+        : Collidable(position_, size_, angle_, color_, textureName_) {
+        health = maxhealth;
+    }
+
+    void renderHealthBar() {
+        float healthpct = health / maxhealth;
+        Renderer::drawQuad(glm::vec2{position.x, position.y - 0.1f},  //
+                           glm::vec2{healthpct * size.x, 0.1f},       //
+                           glm::vec4{0.8, 0.1, 0.f, 1.f}, "white");
+    }
+
+    virtual void render(const RenderOptions& ro = RenderOptions()) {
+        Entity::render(ro);
+        renderHealthBar();
+    }
 };
 
 struct Player : public Movable {
@@ -198,7 +214,10 @@ struct Enemy : public Movable {
         velocity = limit(velocity, speed);
         position += velocity;
         acceleration *= 0;
+
+        if (health <= 0) cleanup = true;
     }
+
     virtual const char* typeString() const { return "Enemy"; }
 };
 

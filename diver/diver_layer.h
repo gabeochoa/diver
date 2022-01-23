@@ -52,14 +52,14 @@ struct DiverLayer : public Layer {
         EntityHelper::addEntity(player);
         GLOBALS.set<Player>("player", player.get());
 
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 100; i++) {
             EntityHelper::addEntity(std::make_shared<Enemy>(Enemy(
                 glm::vec2{randIn(1, 10) * cos(i), randIn(1, 10) * sin(i)},
                 glm::vec2{0.6f, 0.6f}, 0,
                 glm::vec4{gen_rand_vec3(0.3f, 1.0f), 1.f}, peopleSprites[1])));
         }
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = -50; i < 50; i++) {
             EntityHelper::addEntity(
                 std::make_shared<StaticObject>(StaticObject(  //
                     glm::vec2{-10, i},                        //
