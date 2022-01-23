@@ -9,7 +9,11 @@
 #include "../vendor/supermarket-engine/engine/fps_layer.h"
 #include "../vendor/supermarket-engine/engine/keycodes.h"
 #include "../vendor/supermarket-engine/engine/terminal_layer.h"
+//
+#include "entities.h"
+//
 #include "diver_layer.h"
+#include "gameui_layer.h"
 
 constexpr bool IS_DEBUG = true;
 
@@ -42,6 +46,9 @@ int main(int argc, char** argv) {
 
     Layer* fps = new FPSLayer();
     App::get().pushLayer(fps);
+
+    Layer* gameui = new GameUILayer();
+    App::get().pushLayer(gameui);
 
     Layer* diver = new DiverLayer();
     App::get().pushLayer(diver);

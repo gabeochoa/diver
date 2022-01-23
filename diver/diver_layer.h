@@ -6,11 +6,17 @@
 #include "../vendor/supermarket-engine/engine/layer.h"
 #include "../vendor/supermarket-engine/engine/pch.hpp"
 #include "../vendor/supermarket-engine/engine/renderer.h"
-#include "entities.h"
 
 struct DiverLayer : public Layer {
     std::shared_ptr<OrthoCameraController> cameraController;
     std::shared_ptr<Player> player;
+
+    std::array<std::string, 3> fishSprites = {
+        "fish0",
+        "fish1",
+        "fish2",
+    };
+    int MAX_ENEMIES = 10;
 
     DiverLayer() : Layer("Diver") {
         isMinimized = true;
@@ -39,27 +45,12 @@ struct DiverLayer : public Layer {
         Renderer::addSubtexture("tilesheet", "fish2", 2, 1, playerSprite,
                                 playerSprite);
 
-        const int num_people_sprites = 3;
-        std::array<std::string, num_people_sprites> fishSprites = {
-            "fish0",
-            "fish1",
-            "fish2",
-        };
-
         player = std::make_shared<Player>();
         player->size = {0.6f, 0.6f};
         player->color = glm::vec4{gen_rand_vec3(0.3f, 1.0f), 1.f};
         player->textureName = "player";
         EntityHelper::addEntity(player);
         GLOBALS.set<Player>("player", player.get());
-
-        for (int i = 0; i < 10; i++) {
-            EntityHelper::addEntity(std::make_shared<Enemy>(Enemy(
-                glm::vec2{randIn(10, 100) * cos(i), randIn(10, 100) * sin(i)},
-                glm::vec2{0.6f, 0.6f}, 0,
-                glm::vec4{gen_rand_vec3(0.3f, 1.0f), 1.f},
-                fishSprites[i % fishSprites.size()])));
-        }
 
         for (int i = -50; i < 50; i++) {
             EntityHelper::addEntity(
@@ -103,6 +94,14 @@ struct DiverLayer : public Layer {
             return EntityHelper::ForEachFlow::None;
         });
 
+        EntityHelper::forEach<Experience>([&](auto exp) {  //
+            if (aabb(exp->getRect(), player->getRect())) {
+                player->experience += exp->amount;
+                exp->cleanup = true;
+            }
+            return EntityHelper::ForEachFlow::None;
+        });
+
         EntityHelper::forEach<Projectile>([&](auto proj) {
             if (proj->traveled > proj->range) {
                 proj->cleanup = true;
@@ -118,6 +117,17 @@ struct DiverLayer : public Layer {
             });
             return EntityHelper::ForEachFlow::None;
         });
+
+        int numEnemies = EntityHelper::numEntitiesOfType<Enemy>();
+        while (numEnemies < MAX_ENEMIES) {
+            EntityHelper::addEntity(std::make_shared<Enemy>(
+                Enemy(glm::vec2{randIn(10, 100) * cos(numEnemies),
+                                randIn(10, 100) * sin(numEnemies)},
+                      glm::vec2{0.6f, 0.6f}, 0,
+                      glm::vec4{gen_rand_vec3(0.3f, 1.0f), 1.f},
+                      fishSprites[numEnemies % fishSprites.size()])));
+            numEnemies += 1;
+        }
     }
 
     void render() {
@@ -169,6 +179,12 @@ struct DiverLayer : public Layer {
 
         log_trace("{:.2}s ({:.2} ms) ", dt.s(), dt.ms());
         prof give_me_a_name(__PROFILE_FUNC__);
+
+        if (player->experience >= player->expNeededForNextLevel) {
+            player->experience -= player->expNeededForNextLevel;
+            player->level += 1;
+            // TODO show upgrade ui
+        }
 
         if (player->health > 0) {
             child_updates(dt);  // move things around

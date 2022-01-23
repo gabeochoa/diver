@@ -1,13 +1,26 @@
 
+#pragma once
 
 // TODO move this to engine
 #include "custom_fmt.h"
 //
 
+#include "../vendor/supermarket-engine/engine/app.h"
 #include "../vendor/supermarket-engine/engine/entity.h"
 //
 
 #include "weapons.h"
+
+struct Experience : public Entity {
+    int amount = 1;
+
+    Experience(const glm::vec2& position_ = glm::vec2{},
+               const glm::vec2& size_ = glm::vec2{1.f}, float angle_ = 0.f,
+               const glm::vec4& color_ = glm::vec4{1.f},
+               const std::string& textureName_ = "white")
+        : Entity(position_, size_, angle_, color_, textureName_) {}
+    virtual const char* typeString() const { return "Experience"; }
+};
 
 struct Collidable : public Entity {
     Collidable(const glm::vec2& position_ = glm::vec2{},
@@ -58,15 +71,20 @@ struct Player : public Movable {
     std::vector<std::shared_ptr<Weapon>> weapons;
     int facing = 1;
 
+    int level = 1;
+    float expNeededForNextLevel;
+    float experience;
+
     Player(const glm::vec2& position_ = glm::vec2{},
            const glm::vec2& size_ = glm::vec2{1.f}, float angle_ = 0.f,
            const glm::vec4& color_ = glm::vec4{1.f},
            const std::string& textureName_ = "white")
         : Movable(position_, size_, angle_, color_, textureName_) {
         speed = 5.f;
+        experience = 0.f;
 
-        // weapons.push_back(std::make_shared<Bubbles>(Bubbles(this)));
-        weapons.push_back(std::make_shared<Dart>(Dart(this)));
+        weapons.push_back(std::make_shared<Bubbles>(Bubbles(this)));
+        // weapons.push_back(std::make_shared<Dart>(Dart(this)));
         // weapons.push_back(std::make_shared<Spear>(Spear(this)));
     }
 
@@ -97,7 +115,9 @@ struct Player : public Movable {
         for (auto w : weapons) {
             w->onUpdate(dt);
         }
+        expNeededForNextLevel = 1 * std::pow(level, 2.5f);
     }
+
     virtual const char* typeString() const { return "Player"; }
 
     virtual void render(const RenderOptions& ro = RenderOptions()) {
@@ -114,11 +134,13 @@ struct Enemy : public Movable {
     glm::vec2 acceleration;
     float maxacc = 0.03f;
     float dmg = 1.f;
+    float expAmount;
 
     Enemy(const glm::vec2& position_, const glm::vec2& size_, float angle_,
           const glm::vec4& color_, const std::string& textureName_)
         : Movable(position_, size_, angle_, color_, textureName_) {
         speed = 0.05f;
+        expAmount = 1.f;
     }
 
     glm::vec2 toPlayer(std::vector<std::shared_ptr<Enemy>>) {
@@ -218,7 +240,12 @@ struct Enemy : public Movable {
         position += velocity;
         acceleration *= 0;
 
-        if (health <= 0) cleanup = true;
+        if (health <= 0) {
+            cleanup = true;
+            EntityHelper::addEntity(std::make_shared<Experience>(
+                Experience(position, glm::vec2{0.1f}, 0.f,
+                           glm::vec4{0.f, 0.9, 0.3, 1.f}, "white")));
+        }
     }
 
     virtual const char* typeString() const { return "Enemy"; }

@@ -112,7 +112,8 @@ struct Spear : public Weapon {
 
 struct Bubbles : public Weapon {
     Bubbles(Player* o) : Weapon(o) {
-        dmg = 1.f;
+        // TODO replace when ready to test
+        dmg = 100.f;
         cooldown = 0.1f;
         timeleft = cooldown;
         range = 200.f;
