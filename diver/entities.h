@@ -65,7 +65,9 @@ struct Player : public Movable {
         : Movable(position_, size_, angle_, color_, textureName_) {
         speed = 5.f;
 
-        weapons.push_back(std::make_shared<Bubbles>(Bubbles(this)));
+        // weapons.push_back(std::make_shared<Bubbles>(Bubbles(this)));
+        weapons.push_back(std::make_shared<Dart>(Dart(this)));
+        // weapons.push_back(std::make_shared<Spear>(Spear(this)));
     }
 
     virtual void onUpdate(Time dt) {

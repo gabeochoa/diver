@@ -16,6 +16,7 @@ struct Weapon {
     float projectileSpeed;  // how fast it goes + owner speed
     glm::vec2 projectileSize;
     int projectileIndex = 0;
+    std::vector<std::string> textures;
 
     Weapon(Player* o) : owner(o) {}
     virtual ~Weapon() {}
@@ -32,13 +33,18 @@ struct Weapon {
     void onUpdate(Time dt) { handleCooldown(dt); }
     void fire();
     virtual float getAngle(Player* player) = 0;
+    virtual float getTextureAngle(Player*) { return 0; }
     virtual void render() {}
+
+    virtual std::string getTextureName() {
+        return textures[projectileIndex % textures.size()];
+    }
 };
 
 struct Projectile : Entity {
     Weapon* owner;
     glm::vec2 velocity;
-    float angularVelocity;
+    float velocityAngle;
     float traveled = 0.f;
     float range;
 
@@ -46,7 +52,7 @@ struct Projectile : Entity {
         // projectile
         Weapon* o,                                 //
         const glm::vec2& velocity_ = glm::vec2{},  //
-        const float angularVelocity_ = 0.f,        //
+        const float velocityAngle_ = 0.f,          //
         float range_ = 200.f,
         //
         //
@@ -58,14 +64,14 @@ struct Projectile : Entity {
         : Entity(position_, size_, angle_, color_, textureName_) {
         owner = o;
         velocity = velocity_;
-        angularVelocity = angularVelocity_;
         range = range_;
+        velocityAngle = velocityAngle_;
     }
 
     void onUpdate(Time dt) {
-        angle += angularVelocity * dt.s();
-        auto movement = glm::vec2{velocity.x * sin(glm::radians(angle)),
-                                  velocity.y * cos(glm::radians(angle))};
+        auto movement =
+            glm::vec2{velocity.x * sin(glm::radians(velocityAngle)),
+                      velocity.y * cos(glm::radians(velocityAngle))};
         position += movement * dt.s();
         traveled += glm::length(movement) * dt.s();
     }
@@ -80,9 +86,13 @@ struct Dart : public Weapon {
         timeleft = cooldown;
         range = 200.f;
         projectileSpeed = 3.f;
-        projectileSize = glm::vec2{0.05f, 0.2f};
+        projectileSize = glm::vec2{0.2f, 0.4f};
+
+        Renderer::addSubtexture("tilesheet", "dart0", 3, 5, 32.f, 32.f);
+        textures.push_back("dart0");
     }
     float getAngle(Player* player) override;
+    float getTextureAngle(Player*) override;
 };
 
 struct Spear : public Weapon {
@@ -93,6 +103,9 @@ struct Spear : public Weapon {
         range = 2.f;
         projectileSpeed = 1.5f;
         projectileSize = glm::vec2{0.2f, 1.f};
+
+        Renderer::addSubtexture("tilesheet", "spear0", 4, 5, 64.f, 32.f);
+        textures.push_back("spear0");
     }
     float getAngle(Player* player) override;
 };
@@ -105,6 +118,11 @@ struct Bubbles : public Weapon {
         range = 200.f;
         projectileSpeed = 0.1f;
         projectileSize = glm::vec2{0.2f, 0.2f};
+
+        Renderer::addSubtexture("tilesheet", "bubbles0", 0, 5, 32.f, 32.f);
+        Renderer::addSubtexture("tilesheet", "bubbles1", 1, 5, 32.f, 32.f);
+        textures.push_back("bubbles0");
+        textures.push_back("bubbles1");
     }
     float getAngle(Player* player) override;
 };
