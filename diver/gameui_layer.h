@@ -107,15 +107,23 @@ struct GameUILayer : public Layer {
                 });
                 text(MK_UUID(id), textConfig);
 
-                if (button(MK_UUID(id),
-                           WidgetConfig({.position = convertUIPos(
-                                             {appSettings.width / 2,
-                                              appSettings.height / 2}),
-                                         .color = glm::vec4{1.f},
-                                         .size = glm::vec2{3 * 32.f, 32.f},
-                                         .text = "test",
-                                         .flipTextY = true}))) {
-                    upgradeWindowOpen = false;
+                auto upgradeOptions =
+                    GLOBALS.get<Player>("player").getUpgradeOptions();
+                const int numButtons = upgradeOptions.size();
+
+                for (int i = 0; i < numButtons; i++) {
+                    if (button(MK_UUID_LOOP(id, i),
+                               WidgetConfig(
+                                   {.position = convertUIPos(
+                                        {appSettings.width / 2,
+                                         appSettings.height / 2.f + 32.f * i}),
+                                    .color = glm::vec4{1.f},
+                                    .size = glm::vec2{3 * 32.f, 32.f},
+                                    .text = upgradeOptions[i].title,
+                                    .flipTextY = true}))) {
+                        upgradeWindowOpen = false;
+                        upgradeOptions[i].apply();
+                    }
                 }
             }
 

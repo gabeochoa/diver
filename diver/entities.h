@@ -68,6 +68,12 @@ struct Movable : public Collidable {
 };
 
 struct Player : public Movable {
+    struct Upgrade {
+        std::string title;
+        std::string description;
+        std::function<void(void)> apply;
+    };
+
     std::vector<std::shared_ptr<Weapon>> weapons;
     int facing = 1;
 
@@ -88,6 +94,26 @@ struct Player : public Movable {
         // weapons.push_back(std::make_shared<Spear>(Spear(this)));
     }
 
+    std::array<Upgrade, 3> getUpgradeOptions() {
+        return std::array<Upgrade, 3>{
+            Upgrade{
+                .title = "Option 1",
+                .description = "description for option 1",
+                .apply = []() { log_info("pressed option 1"); },
+            },
+            Upgrade{
+                .title = "Option 2",
+                .description = "description for option 2",
+                .apply = []() { log_info("pressed option 2"); },
+            },
+            Upgrade{
+                .title = "Option 3",
+                .description = "description for option 3",
+                .apply = []() { log_info("pressed option 3"); },
+            },
+        };
+    }
+
     virtual void onUpdate(Time dt) {
         if (Input::isKeyPressed(Key::getMapping("Left"))) {
             position.x -= speed * dt;
@@ -105,6 +131,11 @@ struct Player : public Movable {
             position.y += speed * dt;
             facing = 3;
         }
+
+        position = glm::vec2{
+            fmax(-10, fmin(10, position.x)),
+            fmax(-100, fmin(100, position.y)),
+        };
 
         auto controller =
             GLOBALS.get_ptr<OrthoCameraController>("diverCameraController");
