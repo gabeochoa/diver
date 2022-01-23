@@ -6,7 +6,7 @@
 #include "../vendor/supermarket-engine/engine/entity.h"
 #include "entities.h"
 
-void Dart::fire() {
+void Weapon::fire() {
     auto getAngle = [](Player* player) -> float {
         if (!player) return 0;
 
@@ -23,18 +23,19 @@ void Dart::fire() {
         }
     };
 
-    EntityHelper::addEntity(                    //
-        std::make_shared<Projectile>(           //
-            Projectile(                         //
-                this,                           // owner
-                glm::vec2{owner->speed + 3.f},  // vel
-                0.f,                            // angularVel
+    EntityHelper::addEntity(                                //
+        std::make_shared<Projectile>(                       //
+            Projectile(                                     //
+                this,                                       // owner
+                glm::vec2{owner->speed + projectileSpeed},  // vel
+                0.f,                                        // angularVel
+                range,                                      // range
                 // entity stuff
-                owner->position,        // position
-                glm::vec2{0.05, 0.1f},  // size
-                getAngle(owner),        // angle
-                glm::vec4{1.f},         // color
-                "white"                 //
-                )                       //
+                owner->position,  // position
+                projectileSize,   // size
+                getAngle(owner),  // angle
+                glm::vec4{1.f},   // color
+                "white"           //
+                )                 //
             ));
 }

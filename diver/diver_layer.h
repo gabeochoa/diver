@@ -52,7 +52,7 @@ struct DiverLayer : public Layer {
         EntityHelper::addEntity(player);
         GLOBALS.set<Player>("player", player.get());
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             EntityHelper::addEntity(std::make_shared<Enemy>(Enemy(
                 glm::vec2{randIn(1, 10) * cos(i), randIn(1, 10) * sin(i)},
                 glm::vec2{0.6f, 0.6f}, 0,
@@ -94,11 +94,8 @@ struct DiverLayer : public Layer {
             return EntityHelper::ForEachFlow::None;
         });
 
-        float MAX_DIST = 200.f;
-
         EntityHelper::forEach<Projectile>([&](auto proj) {
-            // out of bounds just delete it and move on
-            if (glm::distance(proj->position, glm::vec2{0.f}) > MAX_DIST) {
+            if (proj->traveled > proj->range) {
                 proj->cleanup = true;
                 return EntityHelper::ForEachFlow::Continue;
             }

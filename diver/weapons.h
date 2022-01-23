@@ -9,10 +9,12 @@ struct Player;
 
 struct Weapon {
     Player* owner;
-    float dmg;
-    float cooldown;
+    float dmg;       // how much this does, base enemies have 100 health
+    float cooldown;  // how much time between firing
     float timeleft;
-    float range;
+    float range;            // ? nothing right now TODO
+    float projectileSpeed;  // how fast it goes + owner speed
+    glm::vec2 projectileSize;
 
     Weapon(Player* o) : owner(o) {}
     virtual ~Weapon() {}
@@ -26,21 +28,25 @@ struct Weapon {
     }
 
     void onUpdate(Time dt) { handleCooldown(dt); }
-
+    void fire();
     virtual void render() {}
-    virtual void fire() = 0;
 };
 
 struct Projectile : Entity {
     Weapon* owner;
     glm::vec2 velocity;
     float angularVelocity;
+    float traveled = 0.f;
+    float range;
 
     Projectile(
         // projectile
-        Weapon* o, const glm::vec2& velocity_ = glm::vec2{},
-        const float angularVelocity_ = 0.f,
-
+        Weapon* o,                                 //
+        const glm::vec2& velocity_ = glm::vec2{},  //
+        const float angularVelocity_ = 0.f,        //
+        float range_ = 200.f,
+        //
+        //
         // entity stuff
         const glm::vec2& position_ = glm::vec2{},
         const glm::vec2& size_ = glm::vec2{1.f}, float angle_ = 0.f,
@@ -50,6 +56,7 @@ struct Projectile : Entity {
         owner = o;
         velocity = velocity_;
         angularVelocity = angularVelocity_;
+        range = range_;
     }
 
     void onUpdate(Time dt) {
@@ -57,9 +64,32 @@ struct Projectile : Entity {
         auto movement = glm::vec2{velocity.x * sin(glm::radians(angle)),
                                   velocity.y * cos(glm::radians(angle))};
         position += movement * dt.s();
+        traveled += glm::length(movement) * dt.s();
     }
 
     virtual const char* typeString() const { return "Projectile"; }
+};
+
+struct Dart : public Weapon {
+    Dart(Player* o) : Weapon(o) {
+        dmg = 10.f;
+        cooldown = 0.5f;
+        timeleft = cooldown;
+        range = 200.f;
+        projectileSpeed = 3.f;
+        projectileSize = glm::vec2{0.05f, 0.2f};
+    }
+};
+
+struct Spear : public Weapon {
+    Spear(Player* o) : Weapon(o) {
+        dmg = 20.f;
+        cooldown = 1.f;
+        timeleft = cooldown;
+        range = 3.f;
+        projectileSpeed = 1.5f;
+        projectileSize = glm::vec2{0.2f, 1.f};
+    }
 };
 
 // TODO support homing
@@ -78,14 +108,3 @@ struct Projectile : Entity {
 // if (enemies.empty()) {
 // return;
 // }
-
-struct Dart : public Weapon {
-    Dart(Player* o) : Weapon(o) {
-        dmg = 10.f;
-        cooldown = 0.5f;
-        timeleft = cooldown;
-        range = 10.f;
-    }
-
-    virtual void fire() override;
-};
