@@ -179,15 +179,18 @@ struct DiverLayer : public Layer {
 
         log_trace("{:.2}s ({:.2} ms) ", dt.s(), dt.ms());
         prof give_me_a_name(__PROFILE_FUNC__);
+        bool* upgradeWindowOpen = GLOBALS.get_ptr<bool>("gameui_upgrade");
+
+        // Only run the game if the window is closed
+        // and player is alive
+        bool runGameTick = !(*upgradeWindowOpen) && player->health > 0;
+        if (runGameTick) child_updates(dt);
 
         if (player->experience >= player->expNeededForNextLevel) {
             player->experience -= player->expNeededForNextLevel;
             player->level += 1;
-            // TODO show upgrade ui
-        }
-
-        if (player->health > 0) {
-            child_updates(dt);  // move things around
+            *upgradeWindowOpen = true;
+            log_info("opening upgrade window");
         }
 
         render();                 // draw everything

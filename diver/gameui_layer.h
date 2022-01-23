@@ -16,12 +16,16 @@ struct GameUILayer : public Layer {
     glm::vec4 rect = glm::vec4{200.f, 1000.f, 1500.f, 200.f};
     std::shared_ptr<IUI::UIContext> uicontext;
     std::shared_ptr<OrthoCameraController> gameUICameraController;
+    bool upgradeWindowOpen;
 
     const float H1_FS = 64.f;
     const float P_FS = 32.f;
 
     GameUILayer() : Layer("Game UI") {
         isMinimized = true;
+
+        upgradeWindowOpen = false;
+        GLOBALS.set<bool>("gameui_upgrade", &upgradeWindowOpen);
 
         auto appSettings = App::getSettings();
 
@@ -72,20 +76,61 @@ struct GameUILayer : public Layer {
                            glm::vec4{0.1f, 0.8f, 0.f, 1.f}, "white");
     }
 
+    void renderUpgradeWindow() {
+        if (upgradeWindowOpen) {
+            auto appSettings = App::getSettings();
+            using namespace IUI;
+            uicontext->begin(gameUICameraController);
+
+            float windowWidth = appSettings.width * 0.3;
+            float windowHeight = appSettings.height * 0.8;
+
+            auto window_location = getPositionSizeForUIRect({
+                appSettings.width / 2.f - windowWidth / 2.f,  //
+                appSettings.height - windowHeight,            //
+                windowWidth,                                  //
+                windowHeight,                                 //
+            });
+            uuid window_id = MK_UUID(id);
+            if (window(window_id, WidgetConfig({
+                                      .color = blue,
+                                      .position = window_location[0],
+                                      .size = window_location[1],
+                                  })  //
+                       )) {
+                auto textConfig = WidgetConfig({
+                    .color = glm::vec4{0.2, 0.7f, 0.4f, 1.0f},
+                    .position = convertUIPos({0, 100.f + H1_FS + 1.f}),
+                    .size = glm::vec2{H1_FS, H1_FS},
+                    .text = "Upgrade",
+                    .flipTextY = true,
+                });
+                text(MK_UUID(id), textConfig);
+
+                if (button(MK_UUID(id),
+                           WidgetConfig({.position = convertUIPos(
+                                             {appSettings.width / 2,
+                                              appSettings.height / 2}),
+                                         .color = glm::vec4{1.f},
+                                         .size = glm::vec2{3 * 32.f, 32.f},
+                                         .text = "test",
+                                         .flipTextY = true}))) {
+                    upgradeWindowOpen = false;
+                }
+            }
+
+            uicontext->end();
+        }
+    }
+
     void render() {
         auto appSettings = App::getSettings();
         gameUICameraController->camera.setProjection(0.f, appSettings.width,
                                                      appSettings.height, 0.f);
         Renderer::begin(gameUICameraController->camera);
-
         // // // // // // // //
-
         renderExperienceBar();
-
-        using namespace IUI;
-        uicontext->begin(gameUICameraController);
-        uicontext->end();
-
+        renderUpgradeWindow();
         // // // // // // // //
         Renderer::end();
     }
