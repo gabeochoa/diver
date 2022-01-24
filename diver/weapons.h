@@ -7,6 +7,8 @@
 
 struct Player;
 
+constexpr size_t NUM_WEAPONS = 3;
+
 struct Weapon {
     Player* owner;
     float dmg;       // how much this does, base enemies have 100 health
@@ -17,6 +19,7 @@ struct Weapon {
     glm::vec2 projectileSize;
     int projectileIndex = 0;
     std::vector<std::string> textures;
+    int level = 0;
 
     Weapon(Player* o) : owner(o) {}
     virtual ~Weapon() {}
@@ -39,6 +42,10 @@ struct Weapon {
     virtual std::string getTextureName() {
         return textures[projectileIndex % textures.size()];
     }
+
+    virtual const char* getName() = 0;
+    virtual const char* getDescription() = 0;
+    virtual std::function<void(void)> getUpgrade() = 0;
 };
 
 struct Projectile : Entity {
@@ -93,6 +100,18 @@ struct Dart : public Weapon {
     }
     float getAngle(Player* player) override;
     float getTextureAngle(Player*) override;
+    virtual const char* getName() override { return "Dart"; }
+    virtual const char* getDescription() override {
+        if (level == 0) {
+            return "Basic Dart. 10 damage, shoots twice a second";
+        }
+        log_warn("Need to implement dart level{}", level);
+        return "Dart Level not implemented";
+    }
+    virtual std::function<void(void)> getUpgrade() override {
+        // TODO implment level upgrades
+        return std::function<void(void)>();
+    }
 };
 
 struct Spear : public Weapon {
@@ -108,6 +127,18 @@ struct Spear : public Weapon {
         textures.push_back("spear0");
     }
     float getAngle(Player* player) override;
+    virtual const char* getName() override { return "Spear"; }
+    virtual const char* getDescription() override {
+        if (level == 0) {
+            return "Basic Spear. 20 damage, shoots once a second";
+        }
+        log_warn("Need to implement spear level{}", level);
+        return "spear Level not implemented";
+    }
+    virtual std::function<void(void)> getUpgrade() override {
+        // TODO implment level upgrades
+        return std::function<void(void)>();
+    }
 };
 
 struct Bubbles : public Weapon {
@@ -126,6 +157,21 @@ struct Bubbles : public Weapon {
         textures.push_back("bubbles1");
     }
     float getAngle(Player* player) override;
+    virtual const char* getName() override { return "Bubbles"; }
+    virtual const char* getDescription() override {
+        if (level == 0) {
+            return "Basic Bubbles. 1 damage, shoots ten times a second";
+        }
+        log_warn("Need to implement bubbles level{}", level);
+        return "bubbles Level not implemented";
+    }
+    virtual std::function<void(void)> getUpgrade() override {
+        // TODO implment level upgrades
+        return [this]() {
+            range *= 2;
+            cooldown /= 2.f;
+        };
+    }
 };
 
 // TODO support homing

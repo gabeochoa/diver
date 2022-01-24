@@ -69,6 +69,13 @@ struct Movable : public Collidable {
 };
 
 struct Player : public Movable {
+    enum UpgradeType {
+        StatUpgrade,
+        WeaponUpgrade,
+        PassiveUpgrade,
+        MAX_TYPE,
+    };
+
     struct Upgrade {
         std::string title;
         std::string description;
@@ -106,15 +113,52 @@ struct Player : public Movable {
             }},
     };
 
-    std::array<Upgrade, 3> getUpgradeOptions() {
-        RandomIndex<EditableStat::MAX_STAT> ri;
-        auto a = STAT_INFO.at(static_cast<EditableStat>(ri.next()));
-        auto b = STAT_INFO.at(static_cast<EditableStat>(ri.next()));
-        auto c = STAT_INFO.at(static_cast<EditableStat>(ri.next()));
-        return std::array<Upgrade, 3>{a, b, c};
+    void getWeaponUpgrade(Upgrade& upgrade, size_t id) {
+        std::shared_ptr<Weapon> rweapon = all_weapons[id];
+        if (rweapon->owner == nullptr) {
+            upgrade.apply = [id]() {
+                auto plr = GLOBALS.get_ptr<Player>("player");
+                plr->addWeapon(id);
+            };
+        } else {
+            upgrade.apply = rweapon->getUpgrade();
+        }
+        upgrade.title = rweapon->getName();
+        upgrade.description = rweapon->getDescription();
     }
 
-    std::vector<std::shared_ptr<Weapon>> weapons;
+    std::array<Upgrade, 3>& getUpgradeOptions() {
+        RandomIndex<EditableStat::MAX_STAT> statRandomizer;
+        RandomIndex<NUM_WEAPONS> weaponRandomizer;
+        size_t index = 0;
+        while (index < upgrades.size()) {
+            int type = randIn(0, UpgradeType::MAX_TYPE - 1);
+            log_info("generating upgrade of type {}", type);
+
+            switch (type) {
+                case UpgradeType::StatUpgrade:
+                    upgrades[index] = STAT_INFO.at(
+                        static_cast<EditableStat>(statRandomizer.next()));
+                    break;
+                case UpgradeType::PassiveUpgrade:
+                    // TODO passive
+                case UpgradeType::WeaponUpgrade:
+                    size_t randomWeapon = weaponRandomizer.next();
+                    getWeaponUpgrade(upgrades[index], randomWeapon);
+                    break;
+            }
+            log_info("generated upgrade {}, {}", upgrades[index].title,
+                     upgrades[index].description);
+            index++;
+        }
+        return upgrades;
+    }
+
+    std::array<std::shared_ptr<Weapon>, NUM_WEAPONS> all_weapons;
+    std::vector<int> weapons;
+    std::vector<int> passives;
+    std::array<Upgrade, 3> upgrades;
+
     int facing = 1;
 
     int level = 1;
@@ -129,9 +173,20 @@ struct Player : public Movable {
         speed = 5.f;
         experience = 0.f;
 
-        weapons.push_back(std::make_shared<Bubbles>(Bubbles(this)));
-        // weapons.push_back(std::make_shared<Dart>(Dart(this)));
-        // weapons.push_back(std::make_shared<Spear>(Spear(this)));
+        all_weapons = {
+            //
+            std::make_shared<Bubbles>(Bubbles(nullptr)),
+            std::make_shared<Dart>(Dart(nullptr)),
+            std::make_shared<Spear>(Spear(nullptr))  //
+        };
+
+        addWeapon(0);
+    }
+
+    void addWeapon(int id) {
+        std::shared_ptr<Weapon> our_weapon = all_weapons[id];
+        our_weapon->owner = this;
+        weapons.push_back(id);
     }
 
     virtual void onUpdate(Time dt) {
@@ -164,7 +219,7 @@ struct Player : public Movable {
         controller->camera.updateViewMat();
 
         for (auto w : weapons) {
-            w->onUpdate(dt);
+            all_weapons[w]->onUpdate(dt);
         }
         expNeededForNextLevel = 1 * std::pow(level, 2.5f);
     }
@@ -175,7 +230,7 @@ struct Player : public Movable {
         Movable::render(ro);
 
         for (auto w : weapons) {
-            w->render();
+            all_weapons[w]->render();
         }
     }
 };
