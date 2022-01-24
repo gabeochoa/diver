@@ -43,6 +43,7 @@ struct StaticObject : public Collidable {
 struct Movable : public Collidable {
     float maxhealth = 100.f;
     float health;
+    float regenRate = 0.f;
 
     float speed = 1.f;
 
@@ -74,6 +75,45 @@ struct Player : public Movable {
         std::function<void(void)> apply;
     };
 
+    enum EditableStat {
+        Speed,
+        MaxHealth,
+        Regen,
+        MAX_STAT,
+    };
+
+    CEMap<EditableStat, Upgrade, 3> STAT_INFO = {
+        std::pair<EditableStat, Upgrade>{
+            EditableStat::Speed,
+            Upgrade{
+                .title = "Speed",
+                .description = "swim faster",
+                .apply = []() { log_info("pressed Speed"); },
+            }},
+        std::pair<EditableStat, Upgrade>{
+            EditableStat::MaxHealth,
+            Upgrade{
+                .title = "Max Health",
+                .description = "more health",
+                .apply = []() { log_info("pressed health"); },
+            }},
+        std::pair<EditableStat, Upgrade>{
+            EditableStat::Regen,
+            Upgrade{
+                .title = "Regenerate Health",
+                .description = "healing",
+                .apply = []() { log_info("pressed regen"); },
+            }},
+    };
+
+    std::array<Upgrade, 3> getUpgradeOptions() {
+        RandomIndex<EditableStat::MAX_STAT> ri;
+        auto a = STAT_INFO.at(static_cast<EditableStat>(ri.next()));
+        auto b = STAT_INFO.at(static_cast<EditableStat>(ri.next()));
+        auto c = STAT_INFO.at(static_cast<EditableStat>(ri.next()));
+        return std::array<Upgrade, 3>{a, b, c};
+    }
+
     std::vector<std::shared_ptr<Weapon>> weapons;
     int facing = 1;
 
@@ -92,26 +132,6 @@ struct Player : public Movable {
         weapons.push_back(std::make_shared<Bubbles>(Bubbles(this)));
         // weapons.push_back(std::make_shared<Dart>(Dart(this)));
         // weapons.push_back(std::make_shared<Spear>(Spear(this)));
-    }
-
-    std::array<Upgrade, 3> getUpgradeOptions() {
-        return std::array<Upgrade, 3>{
-            Upgrade{
-                .title = "Option 1",
-                .description = "description for option 1",
-                .apply = []() { log_info("pressed option 1"); },
-            },
-            Upgrade{
-                .title = "Option 2",
-                .description = "description for option 2",
-                .apply = []() { log_info("pressed option 2"); },
-            },
-            Upgrade{
-                .title = "Option 3",
-                .description = "description for option 3",
-                .apply = []() { log_info("pressed option 3"); },
-            },
-        };
     }
 
     virtual void onUpdate(Time dt) {

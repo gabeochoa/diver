@@ -16,7 +16,9 @@ struct GameUILayer : public Layer {
     glm::vec4 rect = glm::vec4{200.f, 1000.f, 1500.f, 200.f};
     std::shared_ptr<IUI::UIContext> uicontext;
     std::shared_ptr<OrthoCameraController> gameUICameraController;
+
     bool upgradeWindowOpen;
+    std::vector<Player::Upgrade> upgradeOptions;
 
     const float H1_FS = 64.f;
     const float P_FS = 32.f;
@@ -107,8 +109,13 @@ struct GameUILayer : public Layer {
                 });
                 text(MK_UUID(id), textConfig);
 
-                auto upgradeOptions =
-                    GLOBALS.get<Player>("player").getUpgradeOptions();
+                if (upgradeOptions.empty()) {
+                    auto upgrades =
+                        GLOBALS.get<Player>("player").getUpgradeOptions();
+                    upgradeOptions.insert(upgradeOptions.end(), &upgrades[0],
+                                          &upgrades[upgrades.size()]);
+                }
+
                 const int numButtons = upgradeOptions.size();
 
                 for (int i = 0; i < numButtons; i++) {
@@ -123,6 +130,7 @@ struct GameUILayer : public Layer {
                                     .flipTextY = true}))) {
                         upgradeWindowOpen = false;
                         upgradeOptions[i].apply();
+                        upgradeOptions.clear();
                     }
                 }
             }
