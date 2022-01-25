@@ -62,6 +62,11 @@ struct Movable : public Collidable {
                            glm::vec4{0.8, 0.1, 0.f, 1.f}, "white");
     }
 
+    virtual void onUpdate(Time dt) {
+        float amt_to_regen = regenRate * dt.s() * maxhealth;
+        health = fmin(maxhealth, health + amt_to_regen);
+    }
+
     virtual void render(const RenderOptions& ro = RenderOptions()) {
         Entity::render(ro);
         renderHealthBar();
@@ -95,21 +100,39 @@ struct Player : public Movable {
             Upgrade{
                 .title = "Speed",
                 .description = "swim faster",
-                .apply = []() { log_info("pressed Speed"); },
+                .apply =
+                    []() {
+                        auto plr = GLOBALS.get_ptr<Player>("player");
+                        plr->speed *= 1.5f;
+                    },
             }},
         std::pair<EditableStat, Upgrade>{
             EditableStat::MaxHealth,
             Upgrade{
                 .title = "Max Health",
                 .description = "more health",
-                .apply = []() { log_info("pressed health"); },
+                .apply =
+                    []() {
+                        auto plr = GLOBALS.get_ptr<Player>("player");
+                        if (plr->health >= plr->maxhealth) {
+                            plr->health *= 1.5f;
+                        }
+                        plr->maxhealth *= 1.5f;
+                    },
             }},
         std::pair<EditableStat, Upgrade>{
             EditableStat::Regen,
             Upgrade{
                 .title = "Regenerate Health",
                 .description = "healing",
-                .apply = []() { log_info("pressed regen"); },
+                .apply =
+                    []() {
+                        auto plr = GLOBALS.get_ptr<Player>("player");
+                        if (plr->regenRate == 0) {
+                            plr->regenRate = 1.001f;
+                        }
+                        plr->regenRate *= 2.f;
+                    },
             }},
     };
 
@@ -190,6 +213,8 @@ struct Player : public Movable {
     }
 
     virtual void onUpdate(Time dt) {
+        Movable::onUpdate(dt);
+
         if (Input::isKeyPressed(Key::getMapping("Left"))) {
             position.x -= speed * dt;
             facing = 0;
