@@ -118,20 +118,43 @@ struct GameUILayer : public Layer {
 
                 const int numButtons = upgradeOptions.size();
 
+                // text doesnt need a uuid so its okay if they all have the same
+                // one
+                auto textuuid = MK_UUID(id);
+
                 for (int i = 0; i < numButtons; i++) {
-                    if (button(MK_UUID_LOOP(id, i),
-                               WidgetConfig(
-                                   {.position = convertUIPos(
-                                        {appSettings.width / 2,
-                                         appSettings.height / 2.f + 32.f * i}),
-                                    .color = glm::vec4{1.f},
-                                    .size = glm::vec2{3 * 32.f, 32.f},
-                                    .text = upgradeOptions[i].title,
-                                    .flipTextY = true}))) {
+                    float buttonHeight = 3.f * 32.f;
+                    float startX = appSettings.width / 2.f - windowWidth / 2.f;
+                    float startY = appSettings.height / 2.f + buttonHeight * i;
+
+                    auto buttonConfig = WidgetConfig(
+                        {.position = convertUIPos({startX, startY}),
+                         .color = glm::vec4{1.f},
+                         .size = glm::vec2{windowWidth, buttonHeight},
+                         .text = "",
+                         .flipTextY = true});
+
+                    if (button(MK_UUID_LOOP(id, i), buttonConfig)) {
                         upgradeWindowOpen = false;
                         upgradeOptions[i].apply();
                         upgradeOptions.clear();
                     }
+
+                    text(textuuid,
+                         WidgetConfig({.position = buttonConfig.position +
+                                                   glm::vec2{0, 4.f + 32.f},
+                                       .color = glm::vec4{0.f, 0.f, 0.f, 1.f},
+                                       .size = glm::vec2{32.f, 32.f},
+                                       .text = upgradeOptions[i].title,
+                                       .flipTextY = true}));
+
+                    text(textuuid,
+                         WidgetConfig({.position = buttonConfig.position +
+                                                   glm::vec2{0, 64.f},
+                                       .color = glm::vec4{0.f, 0.f, 0.f, 1.f},
+                                       .size = glm::vec2{16.f, 16.f},
+                                       .text = upgradeOptions[i].description,
+                                       .flipTextY = true}));
                 }
             }
 
