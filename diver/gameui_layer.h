@@ -79,113 +79,125 @@ struct GameUILayer : public Layer {
     }
 
     void renderUpgradeWindow() {
-        if (upgradeWindowOpen) {
-            auto appSettings = App::getSettings();
-            using namespace IUI;
-            uicontext->begin(gameUICameraController);
+        if (!upgradeWindowOpen) {
+            return;
+        }
+        auto appSettings = App::getSettings();
+        using namespace IUI;
+        uicontext->begin(gameUICameraController);
 
-            float windowWidth = appSettings.width * 0.3;
-            float windowHeight = appSettings.height * 0.5;
+        const float windowWidth = appSettings.width * 0.3;
+        const float windowHeight = appSettings.height * 0.5;
 
-            auto window_location = getPositionSizeForUIRect({
-                appSettings.width / 2.f - windowWidth / 2.f,  //
-                appSettings.height - windowHeight,            //
-                windowWidth,                                  //
-                windowHeight,                                 //
-            });
+        auto window_location = getPositionSizeForUIRect({
+            appSettings.width / 2.f - windowWidth / 2.f,  //
+            appSettings.height - windowHeight,            //
+            windowWidth,                                  //
+            windowHeight,                                 //
+        });
 
-            uuid window_id = MK_UUID(id);
-            if (window(window_id, WidgetConfig({
-                                      .color = glm::vec4{0.8, 0.3, 0.f, 1.f},
-                                      .position = window_location[0],
-                                      .size = window_location[1],
-                                  })  //
-                       )) {
-                // text doesnt need a uuid so its okay if they all have the same
-                // one
-                auto textuuid = MK_UUID(id);
+        const uuid window_id = MK_UUID(id);
+        if (window(window_id, WidgetConfig({
+                                  .color = glm::vec4{0.8, 0.3, 0.f, 1.f},
+                                  .position = window_location[0],
+                                  .size = window_location[1],
+                              })  //
+                   )) {
+            // text doesnt need a uuid so its okay if they all have the same
+            // one
+            auto textuuid = MK_UUID(id);
 
-                auto textConfig = WidgetConfig({
-                    .color = glm::vec4{0.2, 0.7f, 0.4f, 1.0f},
-                    .position = convertUIPos({0, 100.f + H1_FS + 1.f}),
-                    .size = glm::vec2{H1_FS, H1_FS},
-                    .text = "Upgrade",
-                    .flipTextY = true,
-                });
-                text(textuuid, textConfig);
+            auto player = GLOBALS.get<Player>("player");
 
-                auto player = GLOBALS.get<Player>("player");
-
-                if (upgradeOptions.empty()) {
-                    auto upgrades = player.getUpgradeOptions();
-                    upgradeOptions.insert(upgradeOptions.end(), &upgrades[0],
-                                          &upgrades[upgrades.size()]);
-                }
-
-                float startX = appSettings.width / 2.f - windowWidth / 2.f;
-
-                // TODO it would be cool to add (+10) to the label when hovering
-                // over the button
-                std::array<std::string, 5> texts = {
-                    "Weapons",
-                    // TODO add weapons
-                    fmt::format("Max Health: {}", player.maxhealth),
-                    fmt::format("Regen Rate: {}", player.regenRate),
-                    fmt::format("Speed : {}", player.speed),
-                    "Current Stats",
-                };
-                glm::vec2 textPosition = glm::vec2{
-                    startX,
-                    appSettings.height - 100.f,
-                };
-                for (auto t : texts) {
-                    text(textuuid, WidgetConfig({.position = textPosition,
-                                                 .color = glm::vec4{1.f},
-                                                 .size = glm::vec2{24.f},
-                                                 .text = t,
-                                                 .flipTextY = true}));
-                    textPosition.y -= 24.f;
-                }
-
-                const int numButtons = upgradeOptions.size();
-
-                for (int i = 0; i < numButtons; i++) {
-                    float buttonHeight = 3.f * 32.f;
-                    float startY = appSettings.height / 2.f + buttonHeight * i;
-
-                    auto buttonConfig = WidgetConfig(
-                        {.position = convertUIPos({startX, startY}),
-                         .color = glm::vec4{1.f},
-                         .size = glm::vec2{windowWidth, buttonHeight},
-                         .text = "",
-                         .flipTextY = true});
-
-                    if (button(MK_UUID_LOOP(id, i), buttonConfig)) {
-                        upgradeWindowOpen = false;
-                        upgradeOptions[i].apply();
-                        upgradeOptions.clear();
-                    }
-
-                    text(textuuid,
-                         WidgetConfig({.position = buttonConfig.position +
-                                                   glm::vec2{0, 4.f + 32.f},
-                                       .color = glm::vec4{0.f, 0.f, 0.f, 1.f},
-                                       .size = glm::vec2{32.f, 32.f},
-                                       .text = upgradeOptions[i].title,
-                                       .flipTextY = true}));
-
-                    text(textuuid,
-                         WidgetConfig({.position = buttonConfig.position +
-                                                   glm::vec2{0, 64.f},
-                                       .color = glm::vec4{0.f, 0.f, 0.f, 1.f},
-                                       .size = glm::vec2{16.f, 16.f},
-                                       .text = upgradeOptions[i].description,
-                                       .flipTextY = true}));
-                }
+            if (upgradeOptions.empty()) {
+                auto upgrades = player.getUpgradeOptions();
+                upgradeOptions.insert(upgradeOptions.end(), &upgrades[0],
+                                      &upgrades[upgrades.size()]);
             }
 
-            uicontext->end();
+            float startX = appSettings.width / 2.f - windowWidth / 2.f;
+
+            // TODO it would be cool to add (+10) to the label when hovering
+            // over the button
+            std::array<std::string, 5> texts = {
+                "Weapons",
+                // TODO add weapons
+                fmt::format("Max Health: {}", player.maxhealth),
+                fmt::format("Regen Rate: {}", player.regenRate),
+                fmt::format("Speed : {}", player.speed),
+                "Current Stats",
+            };
+            glm::vec2 textPosition = glm::vec2{
+                startX,
+                appSettings.height - 100.f,
+            };
+            for (auto t : texts) {
+                text(textuuid, WidgetConfig({.position = textPosition,
+                                             .color = glm::vec4{1.f},
+                                             .size = glm::vec2{24.f},
+                                             .text = t,
+                                             .flipTextY = true}));
+                textPosition.y -= 24.f;
+            }
+
+            const int numButtons = upgradeOptions.size();
+
+            for (int i = 0; i < numButtons; i++) {
+                float buttonHeight = 3.f * 32.f;
+                float startY = appSettings.height / 2.f + buttonHeight * i;
+
+                auto buttonConfig =
+                    WidgetConfig({.position = convertUIPos({startX, startY}),
+                                  .color = glm::vec4{1.f},
+                                  .size = glm::vec2{windowWidth, buttonHeight},
+                                  .text = "**********",
+                                  .flipTextY = true});
+
+                if (button(MK_UUID_LOOP(id, i), buttonConfig)) {
+                    upgradeWindowOpen = false;
+                    upgradeOptions[i].apply();
+                    upgradeOptions.clear();
+                }
+
+                text(textuuid,
+                     WidgetConfig({.position = buttonConfig.position +
+                                               glm::vec2{0, 36.f},
+                                   .color = glm::vec4{0.f, 0.f, 0.f, 1.f},
+                                   .size = glm::vec2{32.f, 32.f},
+                                   .text = upgradeOptions[i].title,
+                                   .flipTextY = true}));
+
+                text(textuuid,
+                     WidgetConfig({.position = buttonConfig.position +
+                                               glm::vec2{0, 64.f},
+                                   .color = glm::vec4{0.f, 0.f, 0.f, 1.f},
+                                   .size = glm::vec2{16.f, 16.f},
+                                   .text = upgradeOptions[i].description,
+                                   .flipTextY = true}));
+            }
         }
+
+        uicontext->end();
+    }
+
+    void renderTimer() {
+        // auto appSettings = App::getSettings();
+        using namespace IUI;
+        uicontext->begin(gameUICameraController);
+        auto textuuid = MK_UUID(id);
+
+        int time_since_start = (int)GLOBALS.get<float>("time_since_start");
+        int minutes = time_since_start / 60;
+        int seconds = time_since_start % 60;
+
+        text(textuuid, WidgetConfig({.position = glm::vec2{0, 4.f + 32.f},
+                                     .color = glm::vec4{0.1f, 0.8f, 0.f, 1.f},
+                                     .size = glm::vec2{32.f, 32.f},
+                                     .text = fmt::format("Time: {:0>2}:{:0>2}",
+                                                         minutes, seconds),
+                                     .flipTextY = true}));
+
+        uicontext->end();
     }
 
     void render() {
@@ -194,6 +206,7 @@ struct GameUILayer : public Layer {
                                                      appSettings.height, 0.f);
         Renderer::begin(gameUICameraController->camera);
         // // // // // // // //
+        renderTimer();
         renderExperienceBar();
         renderUpgradeWindow();
         // // // // // // // //

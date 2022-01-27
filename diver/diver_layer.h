@@ -6,8 +6,10 @@
 #include "../vendor/supermarket-engine/engine/layer.h"
 #include "../vendor/supermarket-engine/engine/pch.hpp"
 #include "../vendor/supermarket-engine/engine/renderer.h"
+#include "entities.h"
 
 struct DiverLayer : public Layer {
+    float time_since_start;
     std::shared_ptr<OrthoCameraController> cameraController;
     std::shared_ptr<Player> player;
 
@@ -20,6 +22,9 @@ struct DiverLayer : public Layer {
 
     DiverLayer() : Layer("Diver") {
         isMinimized = true;
+
+        time_since_start = 0;
+        GLOBALS.set<float>("time_since_start", &time_since_start);
 
         auto appSettings = App::getSettings();
 
@@ -78,6 +83,8 @@ struct DiverLayer : public Layer {
     virtual void onDetach() override {}
 
     void child_updates(Time dt) {
+        time_since_start += dt.s();
+
         if (GLOBALS.get<bool>("terminal_closed")) {
             cameraController->onUpdate(dt);
         }
