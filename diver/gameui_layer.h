@@ -85,7 +85,7 @@ struct GameUILayer : public Layer {
             uicontext->begin(gameUICameraController);
 
             float windowWidth = appSettings.width * 0.3;
-            float windowHeight = appSettings.height * 0.8;
+            float windowHeight = appSettings.height * 0.5;
 
             auto window_location = getPositionSizeForUIRect({
                 appSettings.width / 2.f - windowWidth / 2.f,  //
@@ -93,13 +93,18 @@ struct GameUILayer : public Layer {
                 windowWidth,                                  //
                 windowHeight,                                 //
             });
+
             uuid window_id = MK_UUID(id);
             if (window(window_id, WidgetConfig({
-                                      .color = blue,
+                                      .color = glm::vec4{0.8, 0.3, 0.f, 1.f},
                                       .position = window_location[0],
                                       .size = window_location[1],
                                   })  //
                        )) {
+                // text doesnt need a uuid so its okay if they all have the same
+                // one
+                auto textuuid = MK_UUID(id);
+
                 auto textConfig = WidgetConfig({
                     .color = glm::vec4{0.2, 0.7f, 0.4f, 1.0f},
                     .position = convertUIPos({0, 100.f + H1_FS + 1.f}),
@@ -107,24 +112,43 @@ struct GameUILayer : public Layer {
                     .text = "Upgrade",
                     .flipTextY = true,
                 });
-                text(MK_UUID(id), textConfig);
+                text(textuuid, textConfig);
+
+                auto player = GLOBALS.get<Player>("player");
 
                 if (upgradeOptions.empty()) {
-                    auto upgrades =
-                        GLOBALS.get<Player>("player").getUpgradeOptions();
+                    auto upgrades = player.getUpgradeOptions();
                     upgradeOptions.insert(upgradeOptions.end(), &upgrades[0],
                                           &upgrades[upgrades.size()]);
                 }
 
-                const int numButtons = upgradeOptions.size();
+                float startX = appSettings.width / 2.f - windowWidth / 2.f;
 
-                // text doesnt need a uuid so its okay if they all have the same
-                // one
-                auto textuuid = MK_UUID(id);
+                std::array<std::string, 5> texts = {
+                    "Weapons",
+                    // TODO add weapons
+                    fmt::format("Max Health: {}", player.maxhealth),
+                    fmt::format("Regen Rate: {}", player.regenRate),
+                    fmt::format("Speed : {}", player.speed),
+                    "Current Stats",
+                };
+                glm::vec2 textPosition = glm::vec2{
+                    startX,
+                    appSettings.height - 100.f,
+                };
+                for (auto t : texts) {
+                    text(textuuid, WidgetConfig({.position = textPosition,
+                                                 .color = glm::vec4{1.f},
+                                                 .size = glm::vec2{24.f},
+                                                 .text = t,
+                                                 .flipTextY = true}));
+                    textPosition.y -= 24.f;
+                }
+
+                const int numButtons = upgradeOptions.size();
 
                 for (int i = 0; i < numButtons; i++) {
                     float buttonHeight = 3.f * 32.f;
-                    float startX = appSettings.width / 2.f - windowWidth / 2.f;
                     float startY = appSettings.height / 2.f + buttonHeight * i;
 
                     auto buttonConfig = WidgetConfig(
