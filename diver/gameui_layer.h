@@ -84,7 +84,6 @@ struct GameUILayer : public Layer {
         }
         auto appSettings = App::getSettings();
         using namespace IUI;
-        uicontext->begin(gameUICameraController);
 
         const float windowWidth = appSettings.width * 0.3;
         const float windowHeight = appSettings.height * 0.5;
@@ -176,14 +175,11 @@ struct GameUILayer : public Layer {
                                    .flipTextY = true}));
             }
         }
-
-        uicontext->end();
     }
 
     void renderTimer() {
         // auto appSettings = App::getSettings();
         using namespace IUI;
-        uicontext->begin(gameUICameraController);
         auto textuuid = MK_UUID(id);
 
         int time_since_start = (int)GLOBALS.get<float>("time_since_start");
@@ -196,8 +192,6 @@ struct GameUILayer : public Layer {
                                      .text = fmt::format("Time: {:0>2}:{:0>2}",
                                                          minutes, seconds),
                                      .flipTextY = true}));
-
-        uicontext->end();
     }
 
     void render() {
@@ -205,11 +199,13 @@ struct GameUILayer : public Layer {
         gameUICameraController->camera.setProjection(0.f, appSettings.width,
                                                      appSettings.height, 0.f);
         Renderer::begin(gameUICameraController->camera);
+        uicontext->begin(gameUICameraController);
         // // // // // // // //
         renderTimer();
         renderExperienceBar();
         renderUpgradeWindow();
         // // // // // // // //
+        uicontext->end();
         Renderer::end();
     }
 
