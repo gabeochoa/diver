@@ -124,6 +124,8 @@ struct GameUILayer : public Layer {
 
                 float startX = appSettings.width / 2.f - windowWidth / 2.f;
 
+                // TODO it would be cool to add (+10) to the label when hovering
+                // over the button
                 std::array<std::string, 5> texts = {
                     "Weapons",
                     // TODO add weapons
