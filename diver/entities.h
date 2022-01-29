@@ -179,6 +179,13 @@ struct Player : public Movable {
 
     std::array<std::shared_ptr<Weapon>, NUM_WEAPONS> all_weapons;
     std::vector<int> weapons;
+    // TODO passives 
+    //  - magnet that scoops up exp 
+    //  - base damage 
+    //
+    //  TODO should all stat upgrades be passives? 
+    //
+    //  TODO (experience -> oyster?)
     std::vector<int> passives;
     std::array<Upgrade, 3> upgrades;
 

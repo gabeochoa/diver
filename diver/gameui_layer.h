@@ -95,7 +95,7 @@ struct GameUILayer : public Layer {
             windowHeight,                                 //
         });
 
-        const uuid window_id = MK_UUID(id);
+        const uuid window_id = MK_UUID(id,IUI::rootID);
         if (window(window_id, WidgetConfig({
                                   .color = glm::vec4{0.8, 0.3, 0.f, 1.f},
                                   .position = window_location[0],
@@ -104,7 +104,7 @@ struct GameUILayer : public Layer {
                    )) {
             // text doesnt need a uuid so its okay if they all have the same
             // one
-            auto textuuid = MK_UUID(id);
+            auto textuuid = MK_UUID(id, IUI::rootID);
 
             auto player = GLOBALS.get<Player>("player");
 
@@ -149,10 +149,10 @@ struct GameUILayer : public Layer {
                     WidgetConfig({.position = convertUIPos({startX, startY}),
                                   .color = glm::vec4{1.f},
                                   .size = glm::vec2{windowWidth, buttonHeight},
-                                  .text = "**********",
+                                  .text = "",
                                   .flipTextY = true});
 
-                if (button(MK_UUID_LOOP(id, i), buttonConfig)) {
+                if (button(MK_UUID_LOOP(id, IUI::rootID, i), buttonConfig)) {
                     upgradeWindowOpen = false;
                     upgradeOptions[i].apply();
                     upgradeOptions.clear();
@@ -180,7 +180,7 @@ struct GameUILayer : public Layer {
     void renderTimer() {
         // auto appSettings = App::getSettings();
         using namespace IUI;
-        auto textuuid = MK_UUID(id);
+        auto textuuid = MK_UUID(id, IUI::rootID);
 
         int time_since_start = (int)GLOBALS.get<float>("time_since_start");
         int minutes = time_since_start / 60;
