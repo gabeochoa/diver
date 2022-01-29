@@ -1,10 +1,5 @@
 
 
-#define BACKWARD_SUPERMARKET
-#include "../vendor/backward.hpp"
-//
-// #define SUPER_ENGINE_PROFILING_DISABLED
-
 #include "../vendor/supermarket-engine/engine/app.h"
 #include "../vendor/supermarket-engine/engine/fps_layer.h"
 #include "../vendor/supermarket-engine/engine/keycodes.h"
@@ -20,12 +15,6 @@ constexpr bool IS_DEBUG = true;
 int main(int argc, char** argv) {
     (void)argc;
     (void)argv;
-
-    // TODO until i fix the formatting,
-    // we are only using this for SIGINT
-    // lldb printer is so so much nicer id rather take the extra step
-    // to open and run it
-    backward::SignalHandling sh;
 
     App::create({
         .width = 1920,

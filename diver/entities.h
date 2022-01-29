@@ -182,6 +182,7 @@ struct Player : public Movable {
     // TODO passives 
     //  - magnet that scoops up exp 
     //  - base damage 
+    //  - knockback
     //
     //  TODO should all stat upgrades be passives? 
     //
@@ -253,7 +254,7 @@ struct Player : public Movable {
         for (auto w : weapons) {
             all_weapons[w]->onUpdate(dt);
         }
-        expNeededForNextLevel = 1 * std::pow(level, 2.5f);
+        expNeededForNextLevel = 1 * std::pow(level, 1.5f);
     }
 
     virtual const char* typeString() const { return "Player"; }
