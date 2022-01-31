@@ -8,6 +8,7 @@
 #include "../vendor/supermarket-engine/engine/pch.hpp"
 #include "../vendor/supermarket-engine/engine/renderer.h"
 #include "../vendor/supermarket-engine/engine/ui.h"
+#include "../vendor/supermarket-engine/engine/uihelper.h"
 #include "entities.h"
 
 struct GameUILayer : public Layer {
@@ -45,7 +46,7 @@ struct GameUILayer : public Layer {
         gameUICameraController->resizeEnabled = false;
 
         uicontext.reset(new IUI::UIContext());
-        uicontext->init();
+        IUI::init_uicontext(uicontext.get(), gameUICameraController);
     }
 
     virtual ~GameUILayer() {}
@@ -95,7 +96,7 @@ struct GameUILayer : public Layer {
             windowHeight,                                 //
         });
 
-        const uuid window_id = MK_UUID(id,IUI::rootID);
+        const uuid window_id = MK_UUID(id, IUI::rootID);
         if (window(window_id, WidgetConfig({
                                   .color = glm::vec4{0.8, 0.3, 0.f, 1.f},
                                   .position = window_location[0],
@@ -199,7 +200,15 @@ struct GameUILayer : public Layer {
         gameUICameraController->camera.setProjection(0.f, appSettings.width,
                                                      appSettings.height, 0.f);
         Renderer::begin(gameUICameraController->camera);
-        uicontext->begin(gameUICameraController);
+        auto mouseDown =
+            Input::isMouseButtonPressed(Mouse::MouseCode::ButtonLeft);
+        auto mousePosition =
+            screenToWorld(glm::vec3{Input::getMousePosition(), 0.f},
+                          gameUICameraController->camera.view,        //
+                          gameUICameraController->camera.projection,  //
+                          gameUICameraController->camera.viewport     //
+            );
+        uicontext->begin(mouseDown, mousePosition);
         // // // // // // // //
         renderTimer();
         renderExperienceBar();

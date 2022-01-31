@@ -1,10 +1,6 @@
 
 #pragma once
 
-// TODO move this to engine
-#include "custom_fmt.h"
-//
-
 #include "../vendor/supermarket-engine/engine/app.h"
 #include "../vendor/supermarket-engine/engine/entity.h"
 //
